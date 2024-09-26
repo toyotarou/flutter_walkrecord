@@ -14,7 +14,13 @@ part 'walk_record.g.dart';
 @freezed
 class WalkRecordState with _$WalkRecordState {
   const factory WalkRecordState({
-    @Default(<WalkRecordModel>[]) List<WalkRecordModel> walkRecordModelList,
+    // @Default(<WalkRecordModel>[]) List<WalkRecordModel> walkRecordModelList,
+    //
+    //
+    //
+
+    @Default(AsyncValue<List<WalkRecordModel>>.loading())
+    AsyncValue<List<WalkRecordModel>> walkRecordModelList,
     @Default('') String selectedYear,
   }) = _WalkRecordState;
 }
@@ -49,7 +55,8 @@ class WalkRecord extends _$WalkRecord {
         }
       }
 
-      state = state.copyWith(walkRecordModelList: list);
+      // ignore: always_specify_types
+      state = state.copyWith(walkRecordModelList: AsyncValue.data(list));
       // ignore: always_specify_types
     }).catchError((error, _) {
       utility.showError('予期せぬエラーが発生しました');

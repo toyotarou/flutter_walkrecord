@@ -64,55 +64,62 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
 
   ///
   Widget displayYearList() {
-    final List<Widget> list = <Widget>[];
-
-    final List<int> yearList = <int>[];
-
-    final String selectedYear = ref.watch(walkRecordProvider
-        .select((WalkRecordState value) => value.selectedYear));
-
-    ref
+    return ref
         .watch(walkRecordProvider
             .select((WalkRecordState value) => value.walkRecordModelList))
-        .forEach((WalkRecordModel element) {
-      final int year = DateTime.parse('${element.date} 00:00:00').year;
+        .when(
+          data: (List<WalkRecordModel> value) {
+            final List<Widget> list = <Widget>[];
 
-      if (!yearList.contains(year)) {
-        list.add(
-          GestureDetector(
-            onTap: () {
-              ref
-                  .read(walkRecordProvider.notifier)
-                  .setSelectedYear(year: year.toString());
-            },
-            child: SizedBox(
-              width: 60,
-              child: Text(
-                year.toString(),
-                style: TextStyle(
-                    color: (year.toString() == selectedYear)
-                        ? Colors.yellowAccent
-                        : Colors.white),
-              ),
-            ),
-          ),
+            final List<int> yearList = <int>[];
+
+            final String selectedYear = ref.watch(walkRecordProvider
+                .select((WalkRecordState value) => value.selectedYear));
+
+            for (final WalkRecordModel element in value) {
+              final int year = DateTime.parse('${element.date} 00:00:00').year;
+
+              if (!yearList.contains(year)) {
+                list.add(
+                  GestureDetector(
+                    onTap: () {
+                      ref
+                          .read(walkRecordProvider.notifier)
+                          .setSelectedYear(year: year.toString());
+                    },
+                    child: SizedBox(
+                      width: 60,
+                      child: Text(
+                        year.toString(),
+                        style: TextStyle(
+                            color: (year.toString() == selectedYear)
+                                ? Colors.yellowAccent
+                                : Colors.white),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              yearList.add(year);
+            }
+
+            return CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => list[index],
+                    childCount: list.length,
+                  ),
+                ),
+              ],
+            );
+          },
+          error: (Object error, StackTrace stackTrace) =>
+              const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: CircularProgressIndicator()),
         );
-      }
-
-      yearList.add(year);
-    });
-
-    return CustomScrollView(
-      scrollDirection: Axis.horizontal,
-      slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => list[index],
-            childCount: list.length,
-          ),
-        ),
-      ],
-    );
   }
 
   ///
@@ -123,54 +130,61 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
       _holidayMap = holidayState.holidayMap.value!;
     }
 
-    final List<Widget> list = <Widget>[];
-
-    final String selectedYear = ref.watch(walkRecordProvider
-        .select((WalkRecordState value) => value.selectedYear));
-
-    ref
+    return ref
         .watch(walkRecordProvider
             .select((WalkRecordState value) => value.walkRecordModelList))
-        .forEach((WalkRecordModel element) {
-      final int year = DateTime.parse('${element.date} 00:00:00').year;
+        .when(
+          data: (List<WalkRecordModel> value) {
+            final List<Widget> list = <Widget>[];
 
-      if (year.toString() == selectedYear) {
-        final String youbiStr =
-            DateTime.parse('${element.date} 00:00:00').youbiStr;
+            final String selectedYear = ref.watch(walkRecordProvider
+                .select((WalkRecordState value) => value.selectedYear));
 
-        list.add(Container(
-          padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.white.withOpacity(0.3)),
-            ),
-            color: utility.getYoubiColor(
-                date: element.date,
-                youbiStr: youbiStr,
-                holidayMap: _holidayMap),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(element.date),
-              Text(element.step.toString().toCurrency()),
-              Text(element.distance.toString().toCurrency()),
-            ],
-          ),
-        ));
-      }
-    });
+            for (final WalkRecordModel element in value) {
+              final int year = DateTime.parse('${element.date} 00:00:00').year;
 
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => list[index],
-            childCount: list.length,
-          ),
-        ),
-      ],
-    );
+              if (year.toString() == selectedYear) {
+                final String youbiStr =
+                    DateTime.parse('${element.date} 00:00:00').youbiStr;
+
+                list.add(Container(
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.white.withOpacity(0.3)),
+                    ),
+                    color: utility.getYoubiColor(
+                        date: element.date,
+                        youbiStr: youbiStr,
+                        holidayMap: _holidayMap),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(element.date),
+                      Text(element.step.toString().toCurrency()),
+                      Text(element.distance.toString().toCurrency()),
+                    ],
+                  ),
+                ));
+              }
+            }
+
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => list[index],
+                    childCount: list.length,
+                  ),
+                ),
+              ],
+            );
+          },
+          error: (Object error, StackTrace stackTrace) =>
+              const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: CircularProgressIndicator()),
+        );
   }
 }

@@ -16,7 +16,11 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$WalkRecordState {
-  List<WalkRecordModel> get walkRecordModelList =>
+// @Default(<WalkRecordModel>[]) List<WalkRecordModel> walkRecordModelList,
+//
+//
+//
+  AsyncValue<List<WalkRecordModel>> get walkRecordModelList =>
       throw _privateConstructorUsedError;
   String get selectedYear => throw _privateConstructorUsedError;
 
@@ -33,7 +37,9 @@ abstract class $WalkRecordStateCopyWith<$Res> {
           WalkRecordState value, $Res Function(WalkRecordState) then) =
       _$WalkRecordStateCopyWithImpl<$Res, WalkRecordState>;
   @useResult
-  $Res call({List<WalkRecordModel> walkRecordModelList, String selectedYear});
+  $Res call(
+      {AsyncValue<List<WalkRecordModel>> walkRecordModelList,
+      String selectedYear});
 }
 
 /// @nodoc
@@ -58,7 +64,7 @@ class _$WalkRecordStateCopyWithImpl<$Res, $Val extends WalkRecordState>
       walkRecordModelList: null == walkRecordModelList
           ? _value.walkRecordModelList
           : walkRecordModelList // ignore: cast_nullable_to_non_nullable
-              as List<WalkRecordModel>,
+              as AsyncValue<List<WalkRecordModel>>,
       selectedYear: null == selectedYear
           ? _value.selectedYear
           : selectedYear // ignore: cast_nullable_to_non_nullable
@@ -75,7 +81,9 @@ abstract class _$$WalkRecordStateImplCopyWith<$Res>
       __$$WalkRecordStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<WalkRecordModel> walkRecordModelList, String selectedYear});
+  $Res call(
+      {AsyncValue<List<WalkRecordModel>> walkRecordModelList,
+      String selectedYear});
 }
 
 /// @nodoc
@@ -96,9 +104,9 @@ class __$$WalkRecordStateImplCopyWithImpl<$Res>
   }) {
     return _then(_$WalkRecordStateImpl(
       walkRecordModelList: null == walkRecordModelList
-          ? _value._walkRecordModelList
+          ? _value.walkRecordModelList
           : walkRecordModelList // ignore: cast_nullable_to_non_nullable
-              as List<WalkRecordModel>,
+              as AsyncValue<List<WalkRecordModel>>,
       selectedYear: null == selectedYear
           ? _value.selectedYear
           : selectedYear // ignore: cast_nullable_to_non_nullable
@@ -111,20 +119,17 @@ class __$$WalkRecordStateImplCopyWithImpl<$Res>
 
 class _$WalkRecordStateImpl implements _WalkRecordState {
   const _$WalkRecordStateImpl(
-      {final List<WalkRecordModel> walkRecordModelList = const [],
-      this.selectedYear = ''})
-      : _walkRecordModelList = walkRecordModelList;
+      {this.walkRecordModelList =
+          const AsyncValue<List<WalkRecordModel>>.loading(),
+      this.selectedYear = ''});
 
-  final List<WalkRecordModel> _walkRecordModelList;
+// @Default(<WalkRecordModel>[]) List<WalkRecordModel> walkRecordModelList,
+//
+//
+//
   @override
   @JsonKey()
-  List<WalkRecordModel> get walkRecordModelList {
-    if (_walkRecordModelList is EqualUnmodifiableListView)
-      return _walkRecordModelList;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_walkRecordModelList);
-  }
-
+  final AsyncValue<List<WalkRecordModel>> walkRecordModelList;
   @override
   @JsonKey()
   final String selectedYear;
@@ -139,15 +144,15 @@ class _$WalkRecordStateImpl implements _WalkRecordState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$WalkRecordStateImpl &&
-            const DeepCollectionEquality()
-                .equals(other._walkRecordModelList, _walkRecordModelList) &&
+            (identical(other.walkRecordModelList, walkRecordModelList) ||
+                other.walkRecordModelList == walkRecordModelList) &&
             (identical(other.selectedYear, selectedYear) ||
                 other.selectedYear == selectedYear));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType,
-      const DeepCollectionEquality().hash(_walkRecordModelList), selectedYear);
+  int get hashCode =>
+      Object.hash(runtimeType, walkRecordModelList, selectedYear);
 
   /// Create a copy of WalkRecordState
   /// with the given fields replaced by the non-null parameter values.
@@ -161,11 +166,15 @@ class _$WalkRecordStateImpl implements _WalkRecordState {
 
 abstract class _WalkRecordState implements WalkRecordState {
   const factory _WalkRecordState(
-      {final List<WalkRecordModel> walkRecordModelList,
+      {final AsyncValue<List<WalkRecordModel>> walkRecordModelList,
       final String selectedYear}) = _$WalkRecordStateImpl;
 
+// @Default(<WalkRecordModel>[]) List<WalkRecordModel> walkRecordModelList,
+//
+//
+//
   @override
-  List<WalkRecordModel> get walkRecordModelList;
+  AsyncValue<List<WalkRecordModel>> get walkRecordModelList;
   @override
   String get selectedYear;
 
