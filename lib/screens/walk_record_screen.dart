@@ -1,73 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_walkrecord/controllers/holidays/holidays_notifier.dart';
+import 'package:flutter_walkrecord/controllers/holidays/holidays_response_state.dart';
+import 'package:flutter_walkrecord/controllers/walk_record/walk_record.dart';
+import 'package:flutter_walkrecord/extensions/extensions.dart';
+import 'package:flutter_walkrecord/utilities/utility.dart';
 
-//
-// import 'package:syncfusion_flutter_charts/charts.dart';
-//
-
-import '../utilities/utility.dart';
-import '../view_model/holiday_view_model.dart';
-import '../view_model/walk_record_view_model.dart';
-
-// ignore: must_be_immutable
-class WalkRecordScreen extends ConsumerWidget {
-  WalkRecordScreen({super.key, required this.date});
+class WalkRecordScreen extends ConsumerStatefulWidget {
+  const WalkRecordScreen({super.key, required this.date});
 
   final String date;
 
-  late BuildContext _context;
-  late WidgetRef _ref;
+  @override
+  ConsumerState<WalkRecordScreen> createState() => _WalkRecordScreenState();
+}
 
-  final Utility _utility = Utility();
+class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
+  final Utility utility = Utility();
+
+  Map<String, String> _holidayMap = <String, String>{};
 
   ///
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    _ref = ref;
-    _context = context;
+  void initState() {
+    super.initState();
 
-    final exDate = date.split(' ');
-    final exYmd = exDate[0].split('-');
+    Future(() {
+      ref.read(walkRecordProvider.notifier).getWalkRecord();
+    });
+  }
 
+  ///
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Walk Record'),
-      ),
+      backgroundColor: Colors.transparent,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          _utility.getBackGround(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-
-                child: yearLinkButton(),
-
-                // child: Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //   children: [
-                //
-                //     // GestureDetector(
-                //     //   onTap: () {
-                //     //     showDialog(
-                //     //       context: _context,
-                //     //       builder: (_) {
-                //     //         return WalkRecordGraphScreen(year: exYmd[0]);
-                //     //       },
-                //     //     );
-                //     //   },
-                //     //   child: const Icon(Icons.graphic_eq),
-                //     // ),
-                //   ],
-                // ),
+          utility.getBackGround(),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: <Widget>[
+                  const SizedBox(height: 20),
+                  Container(width: context.screenSize.width),
+                  SizedBox(
+                    height: 50,
+                    child: displayYearList(),
+                  ),
+                  Expanded(child: displayWalkRecordList()),
+                ],
               ),
-              const Divider(thickness: 2, color: Colors.white30),
-              Expanded(child: walkRecordList(year: exYmd[0])),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ],
       ),
@@ -75,85 +61,102 @@ class WalkRecordScreen extends ConsumerWidget {
   }
 
   ///
-  Widget yearLinkButton() {
+  Widget displayYearList() {
     List<Widget> list = [];
 
-    final now = DateTime.now().toString();
-    final exNow = now.split(' ');
-    final exNowYmd = exNow[0].split('-');
+    List<int> yearList = [];
 
-    final exDate = date.split(' ');
-    final exYmd = exDate[0].split('-');
+    final selectedYear =
+        ref.watch(walkRecordProvider.select((value) => value.selectedYear));
 
-    for (var i = 2020; i <= int.parse(exNowYmd[0]); i++) {
-      list.add(
-        TextButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              _context,
-              MaterialPageRoute(
-                builder: (_) => WalkRecordScreen(date: i.toString()),
+    ref
+        .watch(walkRecordProvider.select((value) => value.walkRecordModelList))
+        .forEach((element) {
+      var year = DateTime.parse('${element.date} 00:00:00').year;
+
+      if (!yearList.contains(year)) {
+        list.add(
+          GestureDetector(
+            onTap: () {
+              ref
+                  .read(walkRecordProvider.notifier)
+                  .setSelectedYear(year: year.toString());
+            },
+            child: SizedBox(
+              width: 60,
+              child: Text(
+                year.toString(),
+                style: TextStyle(
+                    color: (year.toString() == selectedYear)
+                        ? Colors.yellowAccent
+                        : Colors.white),
               ),
-            );
-          },
-          child: Text(
-            i.toString(),
-            style: TextStyle(
-                color: (i.toString() == exYmd[0])
-                    ? Colors.greenAccent
-                    : Colors.white),
+            ),
+          ),
+        );
+      }
+
+      yearList.add(year);
+    });
+
+    return CustomScrollView(
+      scrollDirection: Axis.horizontal,
+      slivers: <Widget>[
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) => list[index],
+            childCount: list.length,
           ),
         ),
-      );
-    }
-
-    return Wrap(
-      children: list,
+      ],
     );
   }
 
   ///
-  Widget walkRecordList({required String year}) {
-    final walkRecordState = _ref.watch(walkRecordProvider(year));
+  Widget displayWalkRecordList() {
+    final HolidaysResponseState holidayState = ref.watch(holidayProvider);
 
-    final holidayState = _ref.watch(holidayProvider);
+    if (holidayState.holidayMap.value != null) {
+      _holidayMap = holidayState.holidayMap.value!;
+    }
 
     List<Widget> list = [];
 
-    for (var i = 0; i < walkRecordState.length; i++) {
-      list.add(
-        Card(
-          color: _utility.getBgColor(walkRecordState[i].date, holidayState),
+    final selectedYear =
+        ref.watch(walkRecordProvider.select((value) => value.selectedYear));
+
+    ref
+        .watch(walkRecordProvider.select((value) => value.walkRecordModelList))
+        .forEach((element) {
+      var year = DateTime.parse('${element.date} 00:00:00').year;
+
+      if (year.toString() == selectedYear) {
+        final String youbiStr =
+            DateTime.parse('${element.date} 00:00:00').youbiStr;
+
+        list.add(Container(
+          padding: const EdgeInsets.all(10),
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Colors.white.withOpacity(0.3)),
+            ),
+            color: utility.getYoubiColor(
+                date: element.date,
+                youbiStr: youbiStr,
+                holidayMap: _holidayMap),
+          ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(walkRecordState[i].date),
-              ),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.topRight,
-                  child: Text(
-                    _utility.makeCurrencyDisplay(
-                      walkRecordState[i].step.toString(),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.topRight,
-                  child: Text(
-                    _utility.makeCurrencyDisplay(
-                      walkRecordState[i].distance.toString(),
-                    ),
-                  ),
-                ),
-              ),
+              Text(element.date),
+              Text(element.step.toString().toCurrency()),
+              Text(element.distance.toString().toCurrency()),
             ],
           ),
-        ),
-      );
-    }
+        ));
+      }
+    });
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -167,93 +170,3 @@ class WalkRecordScreen extends ConsumerWidget {
     );
   }
 }
-
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
-
-// class WalkRecordGraphScreen extends ConsumerWidget {
-//   WalkRecordGraphScreen({Key? key, required this.year}) : super(key: key);
-//
-//   final String year;
-//
-//   late WidgetRef _ref;
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     _ref = ref;
-//
-//     Size size = MediaQuery.of(context).size;
-//
-//     return AlertDialog(
-//       backgroundColor: Colors.transparent,
-//       contentPadding: EdgeInsets.zero,
-//       content: SingleChildScrollView(
-//         scrollDirection: Axis.horizontal,
-//         child: Container(
-//           width: size.width * 10,
-//           height: size.height - 100,
-//           decoration: BoxDecoration(
-//             color: Colors.white.withOpacity(0.2),
-//           ),
-//           child: Column(
-//             children: [
-//               _makeGraph(),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   ///
-//   Widget _makeGraph() {
-//     final walkRecordState = _ref.watch(walkRecordProvider(year));
-//
-//     List<ChartData> _list = [];
-//
-//     for (var i = 0; i < walkRecordState.length; i++) {
-//       _list.add(
-//         ChartData(
-//           x: DateTime.parse(walkRecordState[i].date),
-//           step: walkRecordState[i].step,
-//         ),
-//       );
-//     }
-//
-//     return Expanded(
-//       child: SfCartesianChart(
-//         series: <ChartSeries>[
-//           LineSeries<ChartData, DateTime>(
-//             color: Colors.yellowAccent,
-//             width: 3,
-//             dataSource: _list,
-//             xValueMapper: (ChartData data, _) => data.x,
-//             yValueMapper: (ChartData data, _) => data.step,
-//             dataLabelSettings: const DataLabelSettings(isVisible: true),
-//           ),
-//         ],
-//         primaryXAxis: DateTimeAxis(
-//           majorGridLines: const MajorGridLines(width: 0),
-//         ),
-//         primaryYAxis: NumericAxis(
-//           majorGridLines: const MajorGridLines(
-//             width: 2,
-//             color: Colors.white30,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
-
-// class ChartData {
-//   final DateTime x;
-//   final num step;
-//
-//   ChartData({required this.x, required this.step});
-// }

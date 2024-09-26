@@ -1,105 +1,102 @@
+// ignore_for_file: depend_on_referenced_packages, type_annotate_public_apis, cascade_invocations, strict_raw_type, noop_primitive_operations
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class Utility {
   /// 背景取得
-  Widget getBackGround() {
+  // ignore: always_specify_types
+  Widget getBackGround({context}) {
     return Image.asset(
       'assets/images/walk.png',
-      fit: BoxFit.cover,
+      fit: BoxFit.fitHeight,
       color: Colors.black.withOpacity(0.7),
       colorBlendMode: BlendMode.darken,
     );
   }
 
-  /// 月末日取得
-  late String monthEndDateTime;
+  //
+  // ///
+  // Color getLeadingBgColor({required String month}) {
+  //   switch (month.toInt() % 6) {
+  //     case 0:
+  //       return Colors.orangeAccent.withOpacity(0.2);
+  //     case 1:
+  //       return Colors.blueAccent.withOpacity(0.2);
+  //     case 2:
+  //       return Colors.redAccent.withOpacity(0.2);
+  //     case 3:
+  //       return Colors.purpleAccent.withOpacity(0.2);
+  //     case 4:
+  //       return Colors.greenAccent.withOpacity(0.2);
+  //     case 5:
+  //       return Colors.yellowAccent.withOpacity(0.2);
+  //     default:
+  //       return Colors.black;
+  //   }
+  // }
+  //
+  // ///
+  // List<Color> getTwelveColor() {
+  //   return [
+  //     const Color(0xffdb2f20),
+  //     const Color(0xffefa43a),
+  //     const Color(0xfffdf551),
+  //     const Color(0xffa6c63d),
+  //     const Color(0xff439638),
+  //     const Color(0xff469c9e),
+  //     const Color(0xff48a0e1),
+  //     const Color(0xff3070b1),
+  //     const Color(0xff020c75),
+  //     const Color(0xff931c7a),
+  //     const Color(0xffdc2f81),
+  //     const Color(0xffdb2f5c),
+  //   ];
+  // }
+  //
 
-  void makeMonthEnd(int year, int month, int day) {
-    monthEndDateTime = DateTime(year, month, day).toString();
-  }
+  ///
+  Color getYoubiColor({
+    required String date,
+    required String youbiStr,
+    required Map<String, String> holidayMap,
+  }) {
+    Color color = Colors.black.withOpacity(0.2);
 
-  /// 金額を3桁区切りで表示する
-  final formatter = NumberFormat("#,###");
-
-  String makeCurrencyDisplay(String text) {
-    return formatter.format(int.parse(text));
-  }
-
-  /// 背景色取得
-  Color getBgColor(String date, List holidayList) {
-    makeYMDYData(date);
-
-    Color? color;
-
-    switch (youbiNo) {
-      case 0:
-        color = Colors.redAccent[700]!.withOpacity(0.3);
+    switch (youbiStr) {
+      case 'Sunday':
+        color = Colors.redAccent.withOpacity(0.2);
         break;
 
-      case 6:
-        color = Colors.blueAccent[700]!.withOpacity(0.3);
+      case 'Saturday':
+        color = Colors.blueAccent.withOpacity(0.2);
         break;
 
       default:
-        color = Colors.black.withOpacity(0.3);
+        color = Colors.black.withOpacity(0.2);
         break;
     }
 
-    if (holidayList.contains(date)) {
-      color = Colors.greenAccent[700]!.withOpacity(0.3);
+    if (holidayMap[date] != null) {
+      color = Colors.greenAccent.withOpacity(0.2);
     }
 
     return color;
   }
 
-  /// 日付データ作成
-  late String year;
-  late String month;
-  late String day;
-  late String youbi;
-  late String youbiStr;
-  late int youbiNo;
-
-  void makeYMDYData(String date) {
-    List explodedDate = date.split(' ');
-    List explodedSelectedDate = explodedDate[0].split('-');
-    year = explodedSelectedDate[0];
-    month = explodedSelectedDate[1];
-    day = explodedSelectedDate[2];
-
-    DateTime youbiDate =
-        DateTime(int.parse(year), int.parse(month), int.parse(day));
-    youbi = DateFormat('EEEE').format(youbiDate);
-    switch (youbi) {
-      case "Sunday":
-        youbiStr = "日";
-        youbiNo = 0;
-        break;
-      case "Monday":
-        youbiStr = "月";
-        youbiNo = 1;
-        break;
-      case "Tuesday":
-        youbiStr = "火";
-        youbiNo = 2;
-        break;
-      case "Wednesday":
-        youbiStr = "水";
-        youbiNo = 3;
-        break;
-      case "Thursday":
-        youbiStr = "木";
-        youbiNo = 4;
-        break;
-      case "Friday":
-        youbiStr = "金";
-        youbiNo = 5;
-        break;
-      case "Saturday":
-        youbiStr = "土";
-        youbiNo = 6;
-        break;
-    }
+  ///
+  void showError(String msg) {
+    ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!)
+        .showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 5),
+      ),
+    );
   }
+}
+
+class NavigationService {
+  const NavigationService._();
+
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }
