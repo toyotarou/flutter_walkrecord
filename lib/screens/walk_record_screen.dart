@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_walkrecord/controllers/holidays/holidays_notifier.dart';
-import 'package:flutter_walkrecord/controllers/holidays/holidays_response_state.dart';
-import 'package:flutter_walkrecord/controllers/walk_record/walk_record.dart';
-import 'package:flutter_walkrecord/extensions/extensions.dart';
-import 'package:flutter_walkrecord/utilities/utility.dart';
+import '../controllers/holidays/holidays_notifier.dart';
+import '../controllers/holidays/holidays_response_state.dart';
+import '../controllers/walk_record/walk_record.dart';
+import '../extensions/extensions.dart';
+import '../models/walk_record_model.dart';
+import '../utilities/utility.dart';
 
 class WalkRecordScreen extends ConsumerStatefulWidget {
   const WalkRecordScreen({super.key, required this.date});
@@ -25,6 +26,7 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
   void initState() {
     super.initState();
 
+    // ignore: always_specify_types
     Future(() {
       ref.read(walkRecordProvider.notifier).getWalkRecord();
     });
@@ -37,7 +39,7 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
       backgroundColor: Colors.transparent,
       body: Stack(
         fit: StackFit.expand,
-        children: [
+        children: <Widget>[
           utility.getBackGround(),
           SafeArea(
             child: Padding(
@@ -62,17 +64,18 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
 
   ///
   Widget displayYearList() {
-    List<Widget> list = [];
+    final List<Widget> list = <Widget>[];
 
-    List<int> yearList = [];
+    final List<int> yearList = <int>[];
 
-    final selectedYear =
-        ref.watch(walkRecordProvider.select((value) => value.selectedYear));
+    final String selectedYear = ref.watch(walkRecordProvider
+        .select((WalkRecordState value) => value.selectedYear));
 
     ref
-        .watch(walkRecordProvider.select((value) => value.walkRecordModelList))
-        .forEach((element) {
-      var year = DateTime.parse('${element.date} 00:00:00').year;
+        .watch(walkRecordProvider
+            .select((WalkRecordState value) => value.walkRecordModelList))
+        .forEach((WalkRecordModel element) {
+      final int year = DateTime.parse('${element.date} 00:00:00').year;
 
       if (!yearList.contains(year)) {
         list.add(
@@ -120,15 +123,16 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
       _holidayMap = holidayState.holidayMap.value!;
     }
 
-    List<Widget> list = [];
+    final List<Widget> list = <Widget>[];
 
-    final selectedYear =
-        ref.watch(walkRecordProvider.select((value) => value.selectedYear));
+    final String selectedYear = ref.watch(walkRecordProvider
+        .select((WalkRecordState value) => value.selectedYear));
 
     ref
-        .watch(walkRecordProvider.select((value) => value.walkRecordModelList))
-        .forEach((element) {
-      var year = DateTime.parse('${element.date} 00:00:00').year;
+        .watch(walkRecordProvider
+            .select((WalkRecordState value) => value.walkRecordModelList))
+        .forEach((WalkRecordModel element) {
+      final int year = DateTime.parse('${element.date} 00:00:00').year;
 
       if (year.toString() == selectedYear) {
         final String youbiStr =
@@ -148,7 +152,7 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Text(element.date),
               Text(element.step.toString().toCurrency()),
               Text(element.distance.toString().toCurrency()),

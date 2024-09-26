@@ -1,4 +1,4 @@
-import 'package:flutter_walkrecord/extensions/extensions.dart';
+import '../extensions/extensions.dart';
 
 class WalkRecordModel {
   WalkRecordModel({
