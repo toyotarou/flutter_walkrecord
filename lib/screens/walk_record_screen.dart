@@ -35,6 +35,12 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
   ///
   @override
   Widget build(BuildContext context) {
+    final WalkRecordState walkRecordState = ref.watch(walkRecordProvider);
+    final AsyncValue<List<WalkRecordModel>> walkRecordModelList =
+        walkRecordState.walkRecordModelList;
+
+    final String? lastDate = walkRecordModelList.value?.last.date;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -52,6 +58,21 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
                     height: 50,
                     child: displayYearList(),
                   ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(),
+                      if (lastDate != null)
+                        Text(
+                          'lastdate: $lastDate',
+                          style: const TextStyle(color: Colors.yellowAccent),
+                        )
+                      else
+                        Container(),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
                   Expanded(child: displayWalkRecordList()),
                 ],
               ),
@@ -160,11 +181,24 @@ class _WalkRecordScreenState extends ConsumerState<WalkRecordScreen> {
                         holidayMap: _holidayMap),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(element.date),
-                      Text(element.step.toString().toCurrency()),
-                      Text(element.distance.toString().toCurrency()),
+                      Expanded(child: Text(element.date)),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.topRight,
+                          child: Text(
+                            element.step.toString().toCurrency(),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.topRight,
+                          child: Text(
+                            element.distance.toString().toCurrency(),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ));
